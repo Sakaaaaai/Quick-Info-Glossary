@@ -8,6 +8,9 @@ import LoginDialog from './components/LoginDialog';
 import RegisterDialog from './components/RegisterDialog';
 import { fetchTerms } from './components/termsService'; // Firestoreからデータを取得する関数をインポート
 import { signInWithGoogle } from './firebase'; // Google認証をインポート
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'; // Firestoreのインポート
+
+const db = getFirestore();
 
 const VisualTextbook = () => {
   const [selectedTerm, setSelectedTerm] = useState(null);
@@ -23,6 +26,33 @@ const VisualTextbook = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Firestoreにお気に入りを保存する関数
+  const saveFavoritesToFirestore = async (userId, favorites) => {
+    try {
+      const userDoc = doc(db, 'users', userId);
+      await setDoc(userDoc, { favorites }, { merge: true });
+      console.log('お気に入りをFirestoreに保存しました。');
+    } catch (error) {
+      console.error('お気に入りの保存に失敗しました:', error);
+    }
+  };
+
+  // Firestoreからお気に入りを取得する関数
+  const getFavoritesFromFirestore = async (userId) => {
+    try {
+      const userDoc = doc(db, 'users', userId);
+      const docSnap = await getDoc(userDoc);
+      if (docSnap.exists()) {
+        return docSnap.data().favorites || [];
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error('お気に入りの取得に失敗しました:', error);
+      return [];
+    }
+  };
+
   // Googleログイン処理
   const handleGoogleRegister = async () => {
     try {
@@ -30,6 +60,7 @@ const VisualTextbook = () => {
       const userData = result.user;
       setUser({
         username: userData.displayName,
+        uid: userData.uid, // UIDを追加
       });
       setIsRegisterOpen(false);
       console.log('Googleログイン成功:', userData);
@@ -38,10 +69,14 @@ const VisualTextbook = () => {
     }
   };
 
+  // Firestoreからお気に入りを取得
   useEffect(() => {
     if (user) {
-      const storedFavorites = JSON.parse(localStorage.getItem(`favorites_${user.username}`)) || [];
-      setFavorites(storedFavorites);
+      const loadFavorites = async () => {
+        const storedFavorites = await getFavoritesFromFirestore(user.uid); // Firestoreから取得
+        setFavorites(storedFavorites);
+      };
+      loadFavorites();
     } else {
       setFavorites([]);
     }
@@ -76,7 +111,9 @@ const VisualTextbook = () => {
       ? favorites.filter(id => id !== termId)
       : [...favorites, termId];
     setFavorites(newFavorites);
-    localStorage.setItem(`favorites_${user.username}`, JSON.stringify(newFavorites));
+
+    // Firestoreにお気に入りを保存
+    saveFavoritesToFirestore(user.uid, newFavorites);
   };
 
   const startQuiz = () => {
