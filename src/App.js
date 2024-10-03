@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Header from './components/Header';
 import TermList from './components/TermList';
 import TermDetails from './components/TermDetails';
@@ -6,9 +6,10 @@ import Quiz from './components/Quiz';
 import Footer from './components/Footer';
 import LoginDialog from './components/LoginDialog';
 import RegisterDialog from './components/RegisterDialog';
-import { fetchTerms } from './components/termsService'; // Firestoreからデータを取得する関数をインポート
-import { signInWithGoogle } from './firebase'; // Google認証をインポート
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'; // Firestoreのインポート
+import MainComponents from './components/MainComponents';
+import { fetchTerms } from './components/termsService';
+import { signInWithGoogle } from './firebase';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 const db = getFirestore();
 
@@ -21,10 +22,16 @@ const VisualTextbook = () => {
   const [user, setUser] = useState(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const [searchResults, setSearchResults] = useState([]); // 検索結果のみ
-  const [allTerms, setAllTerms] = useState([]); // 取得した全てのtermsを保持
+  const [searchResults, setSearchResults] = useState([]);
+  const [allTerms, setAllTerms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+
+  // カテゴリーリストを生成
+  const categories = useMemo(() => {
+    const categorySet = new Set(allTerms.map(term => term.category));
+    return Array.from(categorySet);
+  }, [allTerms]);
 
   // Firestoreにお気に入りを保存する関数
   const saveFavoritesToFirestore = async (userId, favorites) => {
@@ -60,7 +67,7 @@ const VisualTextbook = () => {
       const userData = result.user;
       setUser({
         username: userData.displayName,
-        uid: userData.uid, // UIDを追加
+        uid: userData.uid,
       });
       setIsRegisterOpen(false);
       console.log('Googleログイン成功:', userData);
@@ -73,7 +80,7 @@ const VisualTextbook = () => {
   useEffect(() => {
     if (user) {
       const loadFavorites = async () => {
-        const storedFavorites = await getFavoritesFromFirestore(user.uid); // Firestoreから取得
+        const storedFavorites = await getFavoritesFromFirestore(user.uid);
         setFavorites(storedFavorites);
       };
       loadFavorites();
@@ -88,8 +95,8 @@ const VisualTextbook = () => {
       setLoading(true);
       try {
         const termsData = await fetchTerms();
-        setAllTerms(termsData); // すべてのデータを保持
-        setSearchResults([]); // 初期状態では何も表示しない
+        setAllTerms(termsData);
+        setSearchResults([]);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching terms:', error);
@@ -164,29 +171,26 @@ const VisualTextbook = () => {
     setSearchTerm(term);
 
     if (term === '') {
-      setSearchResults(allTerms); // 空の場合は全ての用語を表示
+      setSearchResults(allTerms);
       return;
     }
 
-    // 入力された単語に一致する単語をフィルタリング
     const filteredResults = allTerms.filter(current => 
       current.name.toLowerCase().includes(term.toLowerCase())
     );
 
     if (filteredResults.length === 0) {
-      // 結果がない場合
       setSearchResults([]);
     } else {
-      // 結果がある場合
       setSearchResults(filteredResults);
     }
   };
 
   // ホームに戻る処理
   const handleHomeClick = () => {
-    setSelectedTerm(null);   // 選択された用語をリセット
-    setSearchResults(allTerms); // 全用語を表示
-    setSearchTerm('');      // 検索バーをクリア
+    setSelectedTerm(null);
+    setSearchResults(allTerms);
+    setSearchTerm('');
   };
 
   return (
@@ -201,7 +205,7 @@ const VisualTextbook = () => {
         searchResults={searchResults}
         setSelectedTerm={setSelectedTerm}
         onGoogleRegister={handleGoogleRegister}
-        onHomeClick={handleHomeClick} // ホームに戻るための関数を渡す
+        onHomeClick={handleHomeClick}
       />
       <main className="flex-grow flex">
         {loading ? (
@@ -235,9 +239,7 @@ const VisualTextbook = () => {
                   />
                 )
               ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
-                  <p>左側のメニューから用語を選択してください</p>
-                </div>
+                <MainComponents categories={categories} />
               )}
             </section>
           </>
