@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { signInWithGoogle } from '../firebase'; // FirebaseからGoogle認証関数をインポート
 
-const Header = ({ user, setUser, handleLogout, onSearch, searchResults, setSelectedTerm, onHomeClick }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
+const Header = ({ user, setUser, handleLogout, onSearch, searchResults, setSelectedTerm, onHomeClick, searchTerm, setSearchTerm }) => {
   // 検索ワードが変わるたびに検索を実行
   const handleSearchChange = (e) => {
     const term = e.target.value;
@@ -13,7 +11,6 @@ const Header = ({ user, setUser, handleLogout, onSearch, searchResults, setSelec
 
   const handleResultClick = (term) => {
     setSelectedTerm(term);    // 選択した単語をセット
-    setSearchTerm('');        // 検索バーをクリア
   };
 
   const handleGoogleLogin = async () => {
@@ -33,7 +30,7 @@ const Header = ({ user, setUser, handleLogout, onSearch, searchResults, setSelec
           className="text-2xl font-bold mb-2 sm:mb-0 cursor-pointer hover:text-blue-200 transition-colors duration-200"
           onClick={onHomeClick}  // クリックイベントを追加
         >
-          見る単語帳：情報
+          見る用語集：情報
         </h1>
 
         <div className="w-full sm:w-auto mb-2 sm:mb-0 relative">

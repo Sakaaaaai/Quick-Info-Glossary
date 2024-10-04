@@ -5,7 +5,6 @@ import TermDetails from './components/TermDetails';
 import Quiz from './components/Quiz';
 import Footer from './components/Footer';
 import LoginDialog from './components/LoginDialog';
-import RegisterDialog from './components/RegisterDialog';
 import MainComponents from './components/MainComponents';
 import { fetchTerms } from './components/termsService';
 import { signInWithGoogle } from './firebase';
@@ -26,6 +25,7 @@ const VisualTextbook = () => {
   const [allTerms, setAllTerms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [termOrder, setTermOrder] = useState([]); // 用語の表示順を管理するための状態
 
   // カテゴリーリストを生成
   const categories = useMemo(() => {
@@ -38,9 +38,8 @@ const VisualTextbook = () => {
     try {
       const userDoc = doc(db, 'users', userId);
       await setDoc(userDoc, { favorites }, { merge: true });
-      console.log('お気に入りをFirestoreに保存しました。');
     } catch (error) {
-      console.error('お気に入りの保存に失敗しました:', error);
+      console.error('Error saving favorites:', error);
     }
   };
 
@@ -55,7 +54,7 @@ const VisualTextbook = () => {
         return [];
       }
     } catch (error) {
-      console.error('お気に入りの取得に失敗しました:', error);
+      console.error('Error getting favorites:', error);
       return [];
     }
   };
@@ -70,9 +69,8 @@ const VisualTextbook = () => {
         uid: userData.uid,
       });
       setIsRegisterOpen(false);
-      console.log('Googleログイン成功:', userData);
     } catch (error) {
-      console.error('Googleアカウントでの新規登録に失敗しました:', error);
+      console.error('Error during Google registration:', error);
     }
   };
 
@@ -96,7 +94,8 @@ const VisualTextbook = () => {
       try {
         const termsData = await fetchTerms();
         setAllTerms(termsData);
-        setSearchResults([]);
+        setSearchResults(termsData);
+        setTermOrder(termsData.map(term => term.id)); // 初期状態で全用語のIDを設定
         setLoading(false);
       } catch (error) {
         console.error('Error fetching terms:', error);
@@ -151,37 +150,21 @@ const VisualTextbook = () => {
     setQuizResult(null);
   };
 
-  const handleLogin = (username, password) => {
-    setUser({ username });
-    setIsLoginOpen(false);
-  };
-
-  const handleRegister = (username, password) => {
-    setUser({ username });
-    setIsRegisterOpen(false);
-  };
-
   const handleLogout = () => {
     setUser(null);
     setFavorites([]);
   };
 
-  // 検索処理
+  // 検索処理：用語一覧の内容は変えないが、検索結果に基づいてselectedTermを設定する
   const handleSearch = (term) => {
     setSearchTerm(term);
 
     if (term === '') {
-      setSearchResults(allTerms);
-      return;
-    }
-
-    const filteredResults = allTerms.filter(current => 
-      current.name.toLowerCase().includes(term.toLowerCase())
-    );
-
-    if (filteredResults.length === 0) {
-      setSearchResults([]);
+      setSearchResults(allTerms); // 検索バーがクリアされたら全用語を表示
     } else {
+      const filteredResults = allTerms.filter(current => 
+        current.name.toLowerCase().includes(term.toLowerCase())
+      );
       setSearchResults(filteredResults);
     }
   };
@@ -193,19 +176,28 @@ const VisualTextbook = () => {
     setSearchTerm('');
   };
 
+  // 用語が選択されたときに順序を更新する関数
+  const handleSelectTerm = (term) => {
+    setSelectedTerm(term);
+    setSearchTerm(''); // 検索バーをクリア
+    setTermOrder(prevOrder => {
+      const newOrder = prevOrder.filter(id => id !== term.id); // 既存のIDを削除
+      return [term.id, ...newOrder]; // 新しく選択された用語のIDを先頭に追加
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <Header 
         user={user}
-        setIsLoginOpen={setIsLoginOpen}
-        setIsRegisterOpen={setIsRegisterOpen}
+        setUser={setUser}
         handleLogout={handleLogout}
         onSearch={handleSearch} 
-        setUser={setUser}
         searchResults={searchResults}
-        setSelectedTerm={setSelectedTerm}
-        onGoogleRegister={handleGoogleRegister}
+        setSelectedTerm={handleSelectTerm} // 検索結果から用語が選択された場合にも呼ばれる
         onHomeClick={handleHomeClick}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
       />
       <main className="flex-grow flex">
         {loading ? (
@@ -215,10 +207,11 @@ const VisualTextbook = () => {
         ) : (
           <>
             <TermList 
-              terms={searchResults}
-              setSelectedTerm={setSelectedTerm} 
+              terms={allTerms} // 用語一覧には常に全用語を表示
+              setSelectedTerm={handleSelectTerm}
               toggleFavorite={toggleFavorite} 
-              favorites={favorites} 
+              favorites={favorites}
+              termOrder={termOrder} // 用語の順序を渡す
             />
             <section className="w-3/4 p-4 overflow-y-auto">
               {selectedTerm ? (
@@ -249,13 +242,6 @@ const VisualTextbook = () => {
       <LoginDialog 
         isLoginOpen={isLoginOpen} 
         setIsLoginOpen={setIsLoginOpen} 
-        handleLogin={handleLogin} 
-      />
-      <RegisterDialog 
-        isRegisterOpen={isRegisterOpen} 
-        setIsRegisterOpen={setIsRegisterOpen} 
-        handleRegister={handleRegister} 
-        onGoogleRegister={handleGoogleRegister}
       />
     </div>
   );
