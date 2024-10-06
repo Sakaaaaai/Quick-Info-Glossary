@@ -12,12 +12,18 @@ const TermList = ({ terms, setSelectedTerm, toggleFavorite, favorites, termOrder
   const renderTermList = (termList) => (
     <ul className="space-y-2">
       {termList.map(term => (
-        <li key={term.id} className="flex items-center justify-between p-2 border rounded-md cursor-pointer" onClick={() => setSelectedTerm(term)}>
+        <li
+          key={term.id}
+          className="flex items-center justify-between p-2 border rounded-md cursor-pointer transition-colors duration-200 hover:bg-gray-200" // hoverで背景色を変更
+          onClick={() => setSelectedTerm(term)}
+        >
           <span>{term.name}</span>
-          <button onClick={(e) => {
-            e.stopPropagation(); // お気に入りのトグル時に用語が選択されないようにする
-            toggleFavorite(term.id);
-          }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // お気に入りのトグル時に用語が選択されないようにする
+              toggleFavorite(term.id);
+            }}
+          >
             <Star className={`w-5 h-5 ${favorites.includes(term.id) ? 'text-yellow-400' : 'text-gray-400'}`} />
           </button>
         </li>

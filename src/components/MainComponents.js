@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
+import TermDetails from './TermDetails';
+import Quiz from './Quiz';
 
-const MainComponents = () => {
+const MainComponents = ({ 
+  categories,
+  allTerms,
+  setSelectedTerm,
+  favorites,
+  toggleFavorite,
+  startQuiz,
+  quizMode,
+  quizQuestion,
+  quizResult,
+  answerQuiz,
+  nextQuestion,
+  endQuiz,
+  updateTermOrder
+}) => {
   // 各カテゴリーに対応するサブカテゴリーを定義
   const subCategories = {
     '情報技術の基礎': ['プログラミング', 'データベース', 'ネットワーク'],
@@ -10,14 +26,12 @@ const MainComponents = () => {
     '問題解決とシステム': ['システム設計', 'プロジェクト管理'],
   };
 
-  // カテゴリーとサブカテゴリーに対応する画像パスを定義（例としてローカル画像パスを使用）
   const images = {
     '情報技術の基礎': '/images/情報技術の基礎.png',
     'データサイエンス': '/images/データサイエンス.png',
     '情報社会とセキュリティ': '/images/情報社会とセキュリティ.png',
     'コンテンツとコミュニケーション': '/images/コンテンツとコミュニケーション.png',
     '問題解決とシステム': '/images/問題解決とシステム.png',
-    // サブカテゴリーに対応する画像パスも追加
     'プログラミング': '/images/プログラミング.png',
     'データベース': '/images/データベース.png',
     'ネットワーク': '/images/ネットワーク.png',
@@ -33,30 +47,57 @@ const MainComponents = () => {
     'プロジェクト管理': '/images/プロジェクト管理.png',
   };
 
-  // カテゴリーと選択されたサブカテゴリーを管理するstate
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+  const [localSelectedTerm, setLocalSelectedTerm] = useState(null);
 
-  // カテゴリーがクリックされたときにサブカテゴリーを表示
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
+    setSelectedSubcategory(null);
+    setLocalSelectedTerm(null);
   };
 
-  // サブカテゴリーがある場合、そのリストを表示
-  const displayedCategories = selectedCategory ? subCategories[selectedCategory] : Object.keys(subCategories);
+  const handleSubcategoryClick = (subcategory) => {
+    setSelectedSubcategory(subcategory);
+    setLocalSelectedTerm(null);
+  };
 
-  // パンくずリストの表示
+  const handleTermClick = (term) => {
+    setLocalSelectedTerm(term);
+    setSelectedTerm(term);
+    updateTermOrder(term.id);  
+  };
+
+  const filteredTerms = allTerms.filter(term => term.subcategory === selectedSubcategory);
+
   const Breadcrumbs = () => (
-    <div className="text-lg text-blue-600 mb-4"> {/* 文字サイズを大きく */}
-      <span 
-        className="cursor-pointer hover:underline"
-        onClick={() => setSelectedCategory(null)} // メインカテゴリーに戻る
-      >
-        メインカテゴリー
-      </span>
-      {selectedCategory && (
+    <div className="text-lg text-blue-600 mb-4">
+      {selectedSubcategory ? (
         <>
+          <span className="cursor-pointer hover:underline" onClick={() => {
+            setSelectedSubcategory(null);
+            setLocalSelectedTerm(null);
+          }}>
+            {selectedCategory}
+          </span>
           {' > '}
-          <span className="font-bold">{selectedCategory}</span>
+          <span className="font-bold">{selectedSubcategory}</span>
+        </>
+      ) : (
+        <>
+          <span className="cursor-pointer hover:underline" onClick={() => {
+            setSelectedCategory(null);
+            setSelectedSubcategory(null);
+            setLocalSelectedTerm(null);
+          }}>
+            メインカテゴリー
+          </span>
+          {selectedCategory && (
+            <>
+              {' > '}
+              <span className="font-bold">{selectedCategory}</span>
+            </>
+          )}
         </>
       )}
     </div>
@@ -65,33 +106,77 @@ const MainComponents = () => {
   return (
     <div className="w-full h-full flex items-center justify-center p-8">
       <div className="w-full max-w-4xl h-full overflow-y-auto">
-        {/* パンくずリストを表示 */}
         <Breadcrumbs />
-        <div className="grid grid-cols-3 gap-6 pb-6">
-          {displayedCategories.map((category, index) => (
-            <div 
-              key={index} 
-              className="aspect-square bg-blue-100 text-blue-800 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 flex flex-col items-center justify-center text-xl font-semibold p-4"
-              onClick={() => !selectedCategory && handleCategoryClick(category)} // カテゴリークリック時のみ反応
-            >
-              {/* カテゴリーまたはサブカテゴリーに対応する画像を表示 */}
-              <img 
-                src={images[category]} 
-                alt={category} 
-                className="w-40 h-40 mb-4" // 画像を大きく表示
-              />
-              {category}
+        {localSelectedTerm ? (
+          quizMode ? (
+            <Quiz 
+              quizQuestion={quizQuestion} 
+              quizResult={quizResult} 
+              answerQuiz={answerQuiz} 
+              nextQuestion={nextQuestion} 
+              endQuiz={endQuiz}
+            />
+          ) : (
+            <TermDetails
+              selectedTerm={localSelectedTerm}
+              startQuiz={startQuiz}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+            />
+          )
+        ) : selectedSubcategory ? (
+          <div>
+            <h2 className="text-xl font-bold mb-4">{selectedSubcategory}</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {filteredTerms.length > 0 ? (
+                filteredTerms.map((term) => (
+                  <div
+                    key={term.id}
+                    className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 hover:border-blue-500 transition-colors"
+                    onClick={() => handleTermClick(term)}
+                  >
+                    <p className="text-blue-600 font-medium text-lg text-center">{term.name}</p>
+                  </div>
+                ))
+              ) : (
+                <p>このサブカテゴリーには単語がありません。</p>
+              )}
             </div>
-          ))}
-        </div>
-        {/* 戻るボタンを表示して、メインカテゴリーに戻る */}
-        {selectedCategory && (
-          <button 
-            onClick={() => setSelectedCategory(null)} 
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            戻る
-          </button>
+          </div>
+        ) : selectedCategory ? (
+          <div className="grid grid-cols-3 gap-6 pb-6">
+            {subCategories[selectedCategory].map((subcategory, index) => (
+              <div 
+                key={index}
+                className="aspect-square bg-blue-100 text-blue-800 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 flex flex-col items-center justify-center text-xl font-semibold p-4"
+                onClick={() => handleSubcategoryClick(subcategory)}
+              >
+                <img
+                  src={images[subcategory]}
+                  alt={subcategory}
+                  className="w-40 h-40 mb-4"
+                />
+                {subcategory}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-6 pb-6">
+            {Object.keys(subCategories).map((category, index) => (
+              <div 
+                key={index}
+                className="aspect-square bg-blue-100 text-blue-800 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 flex flex-col items-center justify-center text-xl font-semibold p-4"
+                onClick={() => handleCategoryClick(category)}
+              >
+                <img
+                  src={images[category]}
+                  alt={category}
+                  className="w-40 h-40 mb-4"
+                />
+                {category}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
