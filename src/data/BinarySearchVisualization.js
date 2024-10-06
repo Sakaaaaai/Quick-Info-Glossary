@@ -26,7 +26,7 @@ const BinarySearchVisualization = () => {
     setMid(newMid);
     setFound(false);
     setStep(0);
-    setExplanation('真ん中の数から探し始めるよ。「次のステップ」ボタンをクリックして、探索を始めよう！');
+    setExplanation('まず、中央の値から探索を開始します。「次のステップ」ボタンを押して、探索を進めてみましょう。');
   };
 
   const nextStep = () => {
@@ -34,42 +34,42 @@ const BinarySearchVisualization = () => {
 
     if (array[mid] === target) {
       setFound(true);
-      setExplanation(`やったね！${target}が見つかったよ。${step + 1}回目で正解！`);
+      setExplanation(`おめでとうございます！${target}が見つかりました。${step + 1}回目のステップで正解です。`);
     } else if (array[mid] < target) {
       setLeft(mid + 1);
       const newMid = Math.floor((mid + 1 + right) / 2);
       setMid(newMid);
-      setExplanation(`${array[mid]}は${target}より小さいから、右半分を探すよ。`);
+      setExplanation(`${array[mid]}は${target}よりも小さいため、右側の部分を探索します。`);
     } else {
       setRight(mid - 1);
       const newMid = Math.floor((left + mid - 1) / 2);
       setMid(newMid);
-      setExplanation(`${array[mid]}は${target}より大きいから、左半分を探すよ。`);
+      setExplanation(`${array[mid]}は${target}よりも大きいため、左側の部分を探索します。`);
     }
 
     setStep(step + 1);
   };
 
   return (
-    <div className="p-6 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl shadow-lg max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold mb-4 text-center text-indigo-700">二分法探索を学ぼう！</h2>
+    <div className="p-6 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl shadow-lg max-w-4xl mx-auto">
+      <h2 className="text-3xl font-bold mb-4 text-center text-indigo-700">二分法探索</h2>
       
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <h3 className="text-xl font-bold mb-2 text-indigo-600">二分法探索って何？</h3>
-        <p className="mb-2">二分法探索は、<span className="font-semibold">整列された</span>データの中から特定の値を素早く見つけ出す方法だよ。</p>
-        <p className="mb-2">例えば、1から100までの数が書かれた100枚のカードが<span className="font-semibold">順番に並んでいる</span>とき、</p>
-        <p className="mb-2">特定の数字を見つけるのに使えるんだ。</p>
-        <p className="mb-4">やり方は簡単！</p>
+      <div className="bg-white p-6 rounded-lg shadow mb-6">
+        <h3 className="text-xl font-bold mb-2 text-indigo-600">二分法探索とは？</h3>
+        <p className="mb-2">二分探索法は、<span className="font-semibold">整列された</span>データから特定の値を素早く見つける方法です。</p>
+        <p className="mb-2">例えば、1から100までの数字が書かれたカードが<span className="font-semibold">順番に並んでいる</span>とします。</p>
+        <p className="mb-2">その中から特定の数字を見つけることができます。</p>
+        <p className="mb-4">方法は簡単です！</p>
         <ol className="list-decimal list-inside mb-4">
-          <li className="mb-1">真ん中のカードを見る</li>
-          <li className="mb-1">探している数字より大きければ、左半分を探す</li>
-          <li className="mb-1">小さければ、右半分を探す</li>
-          <li className="mb-1">見つかるまで、1~3を繰り返す</li>
+          <li className="mb-1">中央のカードを確認します</li>
+          <li className="mb-1">探している数字よりも大きければ、左側を探索します</li>
+          <li className="mb-1">小さければ、右側を探索します</li>
+          <li className="mb-1">見つかるまで、手順1から3を繰り返します</li>
         </ol>
-        <p>この方法を使うと、最悪でも7回で必ず目的の数字が見つかるんだ！</p>
+        <p>この方法を使うと、最大7回で必ず目的の数字が見つかります。</p>
       </div>
 
-      <h3 className="text-2xl font-bold mb-4 text-center text-indigo-600">二分法探索を見てみよう！</h3>
+      <h3 className="text-2xl font-bold mb-4 text-center text-indigo-600">二分法探索を見てみる</h3>
       <p className="text-xl mb-4 text-center font-semibold">探したい数: <span className="text-2xl text-red-500">{target}</span></p>
       
       <div className="flex flex-wrap justify-center gap-4 mb-6 transition-all duration-300">
@@ -96,18 +96,18 @@ const BinarySearchVisualization = () => {
         </div>
         <div className="flex items-center">
           <ArrowRight className="text-red-500 mr-2" />
-          <span>今見てる数</span>
+          <span>現在の値</span>
         </div>
         <div className="flex items-center">
           <Check className="text-green-500 mr-2" />
-          <span>見つかった！</span>
+          <span>見つかりました！</span>
         </div>
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <p className="text-lg font-semibold mb-2">探索の状況：</p>
+        <p className="text-lg font-semibold mb-2">探索の進行状況：</p>
         <p>ステップ数: {step}</p>
-        <p>左端: {left}, 右端: {right}, 真ん中: {mid}</p>
+        <p>左端: {left}, 右端: {right}, 中央: {mid}</p>
       </div>
 
       <div className="bg-yellow-100 p-4 rounded-lg shadow mb-6">
