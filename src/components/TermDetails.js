@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star } from 'lucide-react';
 import BinarySearchVisualization from '../data/BinarySearchVisualization';
+import IDE from '../data/IDE';
 
 const TermDetails = ({ selectedTerm, startQuiz, favorites, toggleFavorite }) => {
   return (
@@ -26,6 +27,7 @@ const TermDetails = ({ selectedTerm, startQuiz, favorites, toggleFavorite }) => 
       <p className="text-lg mb-4">{selectedTerm.description}</p>
       <div dangerouslySetInnerHTML={{ __html: selectedTerm.content }} />
       {selectedTerm.name === "二分法探索" && <BinarySearchVisualization />}
+      {selectedTerm.name === "統合開発環境 (IDE)" && <IDE />}
     </div>
   );
 };

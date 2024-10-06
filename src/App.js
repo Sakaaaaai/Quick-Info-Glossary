@@ -37,15 +37,23 @@ const VisualTextbook = () => {
         setAllTerms(termsData);
         setSearchResults(termsData);
         setTermOrder(termsData.map(term => term.id));
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching terms:', error);
-      } finally {
         setLoading(false);
       }
     };
 
     loadTerms();
   }, []);
+
+  // 用語順序の更新関数
+  const updateTermOrder = (termId) => {
+    setTermOrder(prevOrder => {
+      const newOrder = prevOrder.filter(id => id !== termId);
+      return [termId, ...newOrder];
+    });
+  };
 
   // お気に入りのトグル
   const toggleFavorite = (termId) => {
@@ -61,17 +69,14 @@ const VisualTextbook = () => {
     );
   };
 
-  // クイズの開始
   const startQuiz = () => {
-    if (selectedTerm?.quiz) {
+    if (selectedTerm && selectedTerm.quiz) {
       setQuizMode(true);
-      const randomQuestion = selectedTerm.quiz[Math.floor(Math.random() * selectedTerm.quiz.length)];
-      setQuizQuestion(randomQuestion);
+      setQuizQuestion(selectedTerm.quiz[Math.floor(Math.random() * selectedTerm.quiz.length)]);
       setQuizResult(null);
     }
   };
 
-  // クイズに回答する
   const answerQuiz = (answer) => {
     const isCorrect = answer === quizQuestion.correctAnswer;
     setQuizResult({
@@ -81,20 +86,17 @@ const VisualTextbook = () => {
     });
   };
 
-  // 次の問題に進む
   const nextQuestion = () => {
     setQuizResult(null);
     startQuiz();
   };
 
-  // クイズを終了する
   const endQuiz = () => {
     setQuizMode(false);
     setQuizQuestion(null);
     setQuizResult(null);
   };
 
-  // ログアウト処理
   const handleLogout = () => {
     setUser(null);
     setFavorites([]);
@@ -104,11 +106,14 @@ const VisualTextbook = () => {
   const handleSearch = (term) => {
     setSearchTerm(term);
 
-    const filteredResults = term 
-      ? allTerms.filter(current => current.name.toLowerCase().includes(term.toLowerCase()))
-      : allTerms;
-
-    setSearchResults(filteredResults);
+    if (term === '') {
+      setSearchResults(allTerms);
+    } else {
+      const filteredResults = allTerms.filter(current => 
+        current.name.toLowerCase().includes(term.toLowerCase())
+      );
+      setSearchResults(filteredResults);
+    }
   };
 
   // ホームに戻る処理
@@ -122,10 +127,7 @@ const VisualTextbook = () => {
   const handleSelectTerm = (term) => {
     setSelectedTerm(term);
     setSearchTerm('');
-    setTermOrder(prevOrder => {
-      const newOrder = prevOrder.filter(id => id !== term.id);
-      return [term.id, ...newOrder];
-    });
+    updateTermOrder(term.id);
   };
 
   return (
@@ -174,7 +176,21 @@ const VisualTextbook = () => {
                   />
                 )
               ) : (
-                <MainComponents categories={categories} />
+                <MainComponents 
+                  categories={categories}
+                  allTerms={allTerms}
+                  setSelectedTerm={handleSelectTerm}
+                  favorites={favorites}
+                  toggleFavorite={toggleFavorite}
+                  startQuiz={startQuiz}
+                  quizMode={quizMode}
+                  quizQuestion={quizQuestion}
+                  quizResult={quizResult}
+                  answerQuiz={answerQuiz}
+                  nextQuestion={nextQuestion}
+                  endQuiz={endQuiz}
+                  updateTermOrder={updateTermOrder}
+                />
               )}
             </section>
           </>
