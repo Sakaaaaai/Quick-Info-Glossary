@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
-import TermDetails from './TermDetails';
-import Quiz from './Quiz';
+import TermDetails from './TermDetails'; 
+import Quiz from './Quiz'; 
 
 const MainComponents = ({ 
-  categories,
-  allTerms,
-  setSelectedTerm,
-  favorites,
-  toggleFavorite,
-  startQuiz,
-  quizMode,
-  quizQuestion,
-  quizResult,
-  answerQuiz,
-  nextQuestion,
-  endQuiz,
-  updateTermOrder
+  allTerms, 
+  setSelectedTerm, 
+  favorites, 
+  toggleFavorite, 
+  startQuiz, 
+  quizMode, 
+  quizQuestion, 
+  quizResult, 
+  answerQuiz, 
+  nextQuestion, 
+  endQuiz, 
+  updateTermOrder 
 }) => {
-  // 各カテゴリーに対応するサブカテゴリーを定義
+  
   const subCategories = {
     '情報技術の基礎': ['プログラミング', 'データベース', 'ネットワーク'],
     'データサイエンス': ['データの扱い', '統計手法', '機械学習'],
@@ -71,7 +70,7 @@ const MainComponents = ({
   const filteredTerms = allTerms.filter(term => term.subcategory === selectedSubcategory);
 
   const Breadcrumbs = () => (
-    <div className="text-lg text-blue-600 mb-4">
+    <div className="text-sm sm:text-lg text-blue-600 mb-4 sticky top-0 bg-white z-10 py-2">
       {selectedSubcategory ? (
         <>
           <span className="cursor-pointer hover:underline" onClick={() => {
@@ -104,8 +103,8 @@ const MainComponents = ({
   );
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-8">
-      <div className="w-full max-w-4xl h-full overflow-y-auto">
+    <div className="w-full h-full flex items-center justify-center p-0 sm:p-20">
+      <div className="w-full max-w-4xl h-full overflow-y-auto pt-16 sm:pt-10 px-0"> 
         <Breadcrumbs />
         {localSelectedTerm ? (
           quizMode ? (
@@ -126,54 +125,54 @@ const MainComponents = ({
           )
         ) : selectedSubcategory ? (
           <div>
-            <h2 className="text-xl font-bold mb-4">{selectedSubcategory}</h2>
-            <div className="grid grid-cols-3 gap-4">
+            <h2 className="text-lg sm:text-xl font-bold mb-4">{selectedSubcategory}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {filteredTerms.length > 0 ? (
                 filteredTerms.map((term) => (
                   <div
                     key={term.id}
-                    className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 hover:border-blue-500 transition-colors"
+                    className="w-full p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 hover:border-blue-500 transition-colors"
                     onClick={() => handleTermClick(term)}
                   >
-                    <p className="text-blue-600 font-medium text-lg text-center">{term.name}</p>
+                    <p className="text-sm sm:text-base md:text-lg text-blue-600 font-medium text-center">{term.name}</p>
                   </div>
                 ))
               ) : (
-                <p>このサブカテゴリーには単語がありません。</p>
+                <p className="text-sm sm:text-base">このサブカテゴリーには単語がありません。</p>
               )}
             </div>
           </div>
         ) : selectedCategory ? (
-          <div className="grid grid-cols-3 gap-6 pb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pb-6">
             {subCategories[selectedCategory].map((subcategory, index) => (
               <div 
                 key={index}
-                className="aspect-square bg-blue-100 text-blue-800 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 flex flex-col items-center justify-center text-xl font-semibold p-4"
+                className="w-full aspect-square bg-blue-100 text-blue-800 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 flex flex-col items-center justify-center p-4"
                 onClick={() => handleSubcategoryClick(subcategory)}
               >
                 <img
                   src={images[subcategory]}
                   alt={subcategory}
-                  className="w-40 h-40 mb-4"
+                  className="w-3/4 h-3/4 mb-2 sm:mb-4" 
                 />
-                {subcategory}
+                <p className="text-sm sm:text-base md:text-lg font-semibold">{subcategory}</p>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-6 pb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pb-6">
             {Object.keys(subCategories).map((category, index) => (
               <div 
                 key={index}
-                className="aspect-square bg-blue-100 text-blue-800 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 flex flex-col items-center justify-center text-xl font-semibold p-4"
+                className="w-full aspect-square bg-blue-100 text-blue-800 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200 flex flex-col items-center justify-center p-4"
                 onClick={() => handleCategoryClick(category)}
               >
                 <img
                   src={images[category]}
                   alt={category}
-                  className="w-40 h-40 mb-4"
+                  className="w-3/4 h-3/4 mb-2 sm:mb-4"
                 />
-                {category}
+                <p className="text-sm sm:text-base md:text-lg font-semibold">{category}</p>
               </div>
             ))}
           </div>
@@ -184,3 +183,4 @@ const MainComponents = ({
 };
 
 export default MainComponents;
+
