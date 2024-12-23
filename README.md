@@ -32,5 +32,5 @@ Quick Info Glossary は、高校生が情報技術とコンピュータサイエ
 - `Quiz`: 各用語に対するインタラクティブなクイズ機能を提供
 - `MainComponents`: メインコンテンツエリアを統括し、カテゴリー、サブカテゴリー、用語の表示を管理
 
-##サイトリンク
+## サイトリンク
 https://visualwordbook-20b08.web.app/
