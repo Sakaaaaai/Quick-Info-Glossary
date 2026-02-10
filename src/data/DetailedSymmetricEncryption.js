@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { RefreshCw, KeyRound, ArrowRight, ShieldCheck, AlertTriangle, Lock, Unlock } from 'lucide-react';
+import { RefreshCw, KeyRound, ArrowRight, ShieldCheck, AlertTriangle } from 'lucide-react';
 
-export default function DetailedPublicKeyEncryption() {
+export default function DetailedSymmetricEncryption() {
   const [originalText] = useState('Hello');
-  const [publicKey] = useState('PUB123');
-  const [privateKey] = useState('PRIV456');
-  const [encryptedText, setEncryptedText] = useState('Qjnux');
+  const [key] = useState('KEY123');
+  const [encryptedText, setEncryptedText] = useState('Nkrru');
   const [decryptedText, setDecryptedText] = useState('');
   const [step, setStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -29,8 +28,8 @@ export default function DetailedPublicKeyEncryption() {
   const steps = [
     {
       title: "準備段階",
-      description: "受信者が公開鍵と秘密鍵のペアを生成します。公開鍵は誰でも利用できますが、秘密鍵は受信者のみが保持します。",
-      alert: "重要: 秘密鍵の安全な管理が暗号化システムの安全性を左右します。",
+      description: "送信者と受信者が事前に安全な方法で共通鍵を共有します。この鍵は第三者に知られてはいけません。",
+      alert: "重要: 鍵の安全な共有が暗号化システムの安全性を左右します。",
     },
     {
       title: "送信者: 平文の準備",
@@ -38,14 +37,9 @@ export default function DetailedPublicKeyEncryption() {
       alert: "この時点では、データはまだ保護されていません。",
     },
     {
-      title: "送信者: 公開鍵の取得",
-      description: "送信者は受信者の公開鍵を取得します。これは安全でない通信路でも問題ありません。",
-      alert: "公開鍵は公開情報であり、秘密にする必要はありません。",
-    },
-    {
       title: "送信者: 暗号化アルゴリズムの適用",
-      description: "受信者の公開鍵を使って、暗号化アルゴリズムにより平文を暗号文に変換します。",
-      alert: "暗号化により、第三者（秘密鍵を持たない人）はメッセージを読むことができなくなります。",
+      description: "共通鍵を使って、暗号化アルゴリズムにより平文を暗号文に変換します。",
+      alert: "暗号化により、第三者はメッセージを読むことができなくなります。",
     },
     {
       title: "暗号文の送信",
@@ -58,9 +52,14 @@ export default function DetailedPublicKeyEncryption() {
       alert: "この時点では、データはまだ暗号化された状態です。",
     },
     {
+      title: "受信者: 復号化の準備",
+      description: "受信者は共有された共通鍵を使用して復号化の準備をします。",
+      alert: "正しい鍵を持っていない人は、この先の復号化ができません。",
+    },
+    {
       title: "受信者: 復号化の実行",
-      description: "受信者は自身の秘密鍵を使って暗号文を元の平文に戻します。",
-      alert: "秘密鍵を持つ受信者のみが復号化を行えます。",
+      description: "共通鍵を使って暗号文を元の平文に戻します。",
+      alert: "復号化が成功すると、元のメッセージを読むことができます。",
     }
   ];
 
@@ -69,10 +68,10 @@ export default function DetailedPublicKeyEncryption() {
     setIsAnimating(true);
     
     setTimeout(() => {
-      if (step === 3) {
-        setEncryptedText(encrypt(originalText, publicKey));
+      if (step === 2) {
+        setEncryptedText(encrypt(originalText, key));
       } else if (step === 6) {
-        setDecryptedText(decrypt(encryptedText, privateKey));
+        setDecryptedText(decrypt(encryptedText, key));
       }
       setStep(prev => prev + 1);
       setIsAnimating(false);
@@ -81,52 +80,52 @@ export default function DetailedPublicKeyEncryption() {
 
   const reset = () => {
     setStep(0);
-    setEncryptedText('Qjnux');
+    setEncryptedText('Nkrru');
     setDecryptedText('');
   };
 
   const getSenderStyle = () => {
     if (step < 2) return "bg-blue-100";
-    if (step === 2 || step === 3) return "bg-yellow-100";
+    if (step === 2) return "bg-yellow-100";
     return "bg-gray-100";
   };
 
   const getReceiverStyle = () => {
-    if (step < 5) return "bg-gray-100";
+    if (step < 4) return "bg-gray-100";
     if (step > 5) return "bg-blue-100";
     return "bg-yellow-100";
   };
 
   return (
-    <div className="p-4 md:p-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-xl shadow-lg max-w-4xl mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center text-blue-800">公開鍵暗号方式</h2>
+    <div className="p-4 md:p-6 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-xl shadow-lg max-w-4xl mx-auto">
+      <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center text-blue-800">共通鍵暗号方式</h2>
 
-      {/* 公開鍵暗号方式の概要説明 */}
+      {/* 共通鍵暗号方式の概要説明 */}
       <div className="bg-white p-4 md:p-6 rounded-lg shadow-md mb-4 md:mb-6">
-        <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-blue-700">公開鍵暗号方式とは？</h3>
+        <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-blue-700">共通鍵暗号方式とは？</h3>
         <div className="space-y-3 md:space-y-4">
           <p className="text-base md:text-lg">
-            公開鍵暗号方式は、<span className="font-bold text-blue-600">公開鍵と秘密鍵のペア</span>を使用する暗号化方式です。
+            共通鍵暗号方式は、<span className="font-bold text-blue-600">同じ鍵</span>を使って暗号化と復号化を行う方式です。
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div className="bg-blue-50 p-3 md:p-4 rounded-lg">
               <h4 className="font-bold text-base md:text-lg mb-2">特徴</h4>
               <ul className="list-disc list-inside space-y-1 text-sm md:text-base">
-                <li>暗号化と復号化に異なる鍵を使用</li>
-                <li>公開鍵は公開可能</li>
-                <li>秘密鍵は所有者のみが保持</li>
-                <li>鍵の配布問題を解決</li>
+                <li>処理が高速</li>
+                <li>実装が比較的簡単</li>
+                <li>暗号化・復号化に同じ鍵を使用</li>
+                <li>鍵の長さが安全性に直接影響</li>
               </ul>
             </div>
             
             <div className="bg-yellow-50 p-3 md:p-4 rounded-lg">
               <h4 className="font-bold text-base md:text-lg mb-2">注意点</h4>
               <ul className="list-disc list-inside space-y-1 text-sm md:text-base">
-                <li>処理速度が比較的遅い</li>
-                <li>鍵のサイズが大きい</li>
-                <li>秘密鍵の管理が重要</li>
-                <li>公開鍵の真正性の確認が必要</li>
+                <li>鍵の安全な共有が必要</li>
+                <li>通信相手ごとに異なる鍵が必要</li>
+                <li>鍵の管理が重要</li>
+                <li>定期的な鍵の更新が推奨</li>
               </ul>
             </div>
           </div>
@@ -157,13 +156,7 @@ export default function DetailedPublicKeyEncryption() {
               <p className="text-sm md:text-base font-semibold">平文</p>
               <p className="font-mono">{originalText}</p>
             </div>
-            {step >= 2 && (
-              <div className="bg-white p-2 rounded">
-                <p className="text-sm md:text-base font-semibold">受信者の公開鍵</p>
-                <p className="font-mono">{publicKey}</p>
-              </div>
-            )}
-            {encryptedText && step >= 3 && (
+            {encryptedText && step >= 2 && (
               <div className="bg-white p-2 rounded">
                 <p className="text-sm md:text-base font-semibold">暗号化済み</p>
                 <p className="font-mono">{encryptedText}</p>
@@ -177,22 +170,13 @@ export default function DetailedPublicKeyEncryption() {
           <div className={`transform transition-all duration-500 ${
             step === 0 ? 'scale-125' : 'scale-100'
           }`}>
-            <Lock className="w-10 md:w-12 h-10 md:h-12 text-green-500" />
+            <KeyRound className="w-10 md:w-12 h-10 md:h-12 text-yellow-500" />
           </div>
           <div className="text-center">
-            <p className="font-semibold">公開鍵</p>
-            <p className="font-mono text-sm md:text-base">{publicKey}</p>
+            <p className="font-semibold">共通鍵</p>
+            <p className="font-mono text-sm md:text-base">{key}</p>
           </div>
-          <div className={`transform transition-all duration-500 ${
-            step === 0 ? 'scale-125' : 'scale-100'
-          }`}>
-            <Unlock className="w-10 md:w-12 h-10 md:h-12 text-red-500" />
-          </div>
-          <div className="text-center">
-            <p className="font-semibold">秘密鍵</p>
-            <p className="font-mono text-sm md:text-base">{privateKey}</p>
-          </div>
-          {step >= 4 && step <= 5 && (
+          {step >= 3 && step <= 4 && (
             <div className="animate-pulse">
               <ArrowRight className="w-6 md:w-8 h-6 md:h-8 text-blue-500" />
             </div>
@@ -202,7 +186,7 @@ export default function DetailedPublicKeyEncryption() {
         {/* 受信者 */}
         <div className={`p-3 md:p-4 rounded-lg shadow-md transition-all duration-300 ${getReceiverStyle()}`}>
           <h3 className="font-bold text-lg md:text-xl mb-2 md:mb-3">受信者</h3>
-          {step >= 5 && (
+          {step >= 4 && (
             <div className="space-y-3 md:space-y-4">
               <div className="bg-white p-2 rounded border-l-4 border-red-500">
                 <p className="text-sm md:text-base font-semibold text-red-700">受信した暗号文</p>
@@ -211,13 +195,13 @@ export default function DetailedPublicKeyEncryption() {
               {step === 6 && (
                 <div className="bg-white p-2 rounded border-l-4 border-green-500">
                   <p className="text-sm md:text-base font-semibold text-green-700">復号された平文</p>
-                  <p className="font-mono">{decryptedText}</p>
+                  <p className="font-mono">Hello</p>
                 </div>
               )}
               {step >= 6 && decryptedText && (
                 <div className="bg-green-50 p-2 rounded-lg">
                   <p className="text-sm md:text-base text-green-800">
-                    秘密鍵を使用して復号化が完了しました
+                    正しい鍵を使用して復号化が完了しました
                   </p>
                 </div>
               )}
@@ -266,11 +250,10 @@ export default function DetailedPublicKeyEncryption() {
           セキュリティのポイント
         </h4>
         <ul className="list-disc list-inside space-y-1 text-xs md:text-sm">
-          <li>秘密鍵は受信者のみが保持し、絶対に他人に渡してはいけません</li>
-          <li>公開鍵は広く配布できますが、その真正性を確認することが重要です</li>
-          <li>鍵のサイズが大きいほど、一般的にセキュリティは向上しますが、処理速度は低下します</li>
-          <li>公開鍵暗号方式は計算量が多いため、大量のデータの暗号化には適していません</li>
-          <li>ハイブリッド暗号システムでは、公開鍵暗号方式と共通鍵暗号方式を組み合わせて使用します</li>
+          <li>共通鍵は送信者と受信者のみが知っている必要があります</li>
+          <li>鍵の長さが長いほど、総じて安全性が高くなります</li>
+          <li>定期的な鍵の更新が推奨されます</li>
+          <li>暗号化アルゴリズムの選択も重要です</li>
         </ul>
       </div>
     </div>
